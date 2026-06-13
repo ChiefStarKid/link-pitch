@@ -1,0 +1,52 @@
+# link-pitch
+
+> A Claude Code skill for strategic SEO link insertion and editorial outreach. Given a client website and a target article, it researches both in parallel, identifies blue ocean keyword gaps the article leaves unanswered, generates 9 placement variations across three pitch types, and produces a publisher-ready outreach email in the user's configured voice.
+
+Built for SEO professionals, content marketers, and link building campaigns targeting premium editorial sites. The goal is a link an editor wants to place — not one they'll reject as promotional noise.
+
+Invocation: drop the `link-pitch/` folder into `~/.claude/skills/`, then call `/link-pitch` in Claude Code. A 7-step interactive flow with four checkpoints. No config required beyond the install.
+
+## Key questions this skill answers
+
+- How do I pitch a link insertion to an editor without it reading like a sales email?
+- What's the difference between a simple link placement, a comprehensive edit, and a guest post pitch — and which should I lead with?
+- How do I find the gaps in a target article that my client's page actually fills?
+- How do I check whether an editor is even reachable before I do all this work?
+- How do I adjust the pitch voice to match my own outreach style?
+
+## The three pitch types
+
+- **Simple placement** — insert a link into an existing sentence, minimal edit required
+- **Comprehensive edit** — add 2–3 sentences filling a real content gap, link embedded naturally
+- **Guest post / new content** — pitch a new article the publisher doesn't have yet, with the link as part of the piece
+
+3 variations per type = 9 total options, each with a different angle and insertion strategy.
+
+## The contact gate
+
+After researching the article, the skill checks for a publisher contact route (email address, contact form, contributor/write-for-us page, named editor social profile) before producing any output. If no route is found, you choose to abort or override. This prevents wasted work on unpitchable targets.
+
+## Configurable voice
+
+Two plain-markdown style files in `styles/`:
+- `styles/internal.md` — how the skill communicates with you; governs working messages and internal docs
+- `styles/outreach.md` — voice of the Step 7 external pitch only; ships with a neutral reader-first default; replace with your own voice or point to a different file at Step 1
+
+## Output
+
+Three markdown files per run:
+- `LinkPitch-options-<slug>.md` — all 9 variations
+- `LinkPitch-internal-<slug>.md` — full analysis, recommendation, fallback design
+- `LinkPitch-external-<slug>.md` — final publisher pitch in your outreach voice
+
+## Docs
+
+- [SKILL.md](SKILL.md): 7-step overview, four checkpoints, contact gate, error handling, key rules
+- [references/steps.md](references/steps.md): full step-by-step execution detail and verbatim agent prompts
+- [references/templates.md](references/templates.md): output file structures for all three files
+- [styles/internal.md](styles/internal.md): internal voice — edit freely
+- [styles/outreach.md](styles/outreach.md): outreach voice default — replace with your own
+
+## Source
+
+- [LICENSE](LICENSE): MIT

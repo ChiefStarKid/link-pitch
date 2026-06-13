@@ -1,0 +1,158 @@
+# link-pitch — full documentation
+
+This file concatenates all documentation for LLM ingestion.
+Canonical source: https://github.com/ChiefStarKid/link-pitch
+
+---
+
+## llms.txt
+
+# link-pitch
+
+> A Claude Code skill for strategic SEO link insertion and editorial outreach. Given a client website and a target article, it researches both in parallel, identifies blue ocean keyword gaps the article leaves unanswered, generates 9 placement variations across three pitch types, and produces a publisher-ready outreach email in the user's configured voice.
+
+Built for SEO professionals, content marketers, and link building campaigns targeting premium editorial sites. The goal is a link an editor wants to place — not one they'll reject as promotional noise.
+
+Invocation: drop the `link-pitch/` folder into `~/.claude/skills/`, then call `/link-pitch` in Claude Code. A 7-step interactive flow with four checkpoints. No config required beyond the install.
+
+### Key questions this skill answers
+
+- How do I pitch a link insertion to an editor without it reading like a sales email?
+- What's the difference between a simple link placement, a comprehensive edit, and a guest post pitch — and which should I lead with?
+- How do I find the gaps in a target article that my client's page actually fills?
+- How do I check whether an editor is even reachable before I do all this work?
+- How do I adjust the pitch voice to match my own outreach style?
+
+### The three pitch types
+
+- **Simple placement** — insert a link into an existing sentence, minimal edit required
+- **Comprehensive edit** — add 2–3 sentences filling a real content gap, link embedded naturally
+- **Guest post / new content** — pitch a new article the publisher doesn't have yet, with the link as part of the piece
+
+3 variations per type = 9 total options, each with a different angle and insertion strategy.
+
+### The contact gate
+
+After researching the article, the skill checks for a publisher contact route (email address, contact form, contributor/write-for-us page, named editor social profile) before producing any output. If no route is found, you choose to abort or override.
+
+### Configurable voice
+
+Two plain-markdown style files in `styles/`:
+- `styles/internal.md` — how the skill communicates with you; governs working messages and internal docs
+- `styles/outreach.md` — voice of the Step 7 external pitch only; ships with a neutral reader-first default
+
+### Output
+
+Three markdown files per run:
+- `LinkPitch-options-<slug>.md` — all 9 variations
+- `LinkPitch-internal-<slug>.md` — full analysis, recommendation, fallback design
+- `LinkPitch-external-<slug>.md` — final publisher pitch in your outreach voice
+
+---
+
+## SKILL.md
+
+A Claude Code skill for strategic SEO link insertion and editorial outreach.
+
+### How it works
+
+A 7-step flow with four user-controlled checkpoints:
+
+1. **Gather inputs** — client site, target article (or discovery), linked page, output folder, outreach style
+2. **Research + contact gate** — parallel agents analyze client and article; verifies publisher contact route before proceeding
+3. **Audience fit check** — scores ICP vs article audience overlap; flags weak fits before you invest time
+4. **Anchor text** — proposes SEO-optimized options based on blue ocean gaps, or uses yours
+5. **Generate 9 options** — 3 pitch types × 3 strategic variations
+6. **Internal proposal** — recommendation with supporting analysis and fallback design
+7. **External pitch** — you curate which options to include; skill writes the final publisher email
+
+Full mechanics and verbatim agent prompts: references/steps.md
+Output file structures: references/templates.md
+
+### Key rules
+
+- Never fabricate claims about the client. Only use what's on the website.
+- Edits must match article tone. Casual article → casual suggestions.
+- Option B must add editorial value. Reject pure marketing copy.
+- Blue ocean focus. Prioritise filling identified gaps over insertion points.
+- Contact gate is not optional. Always evaluate all four contact criteria after Step 2.
+- Override caveat propagates silently into Step 6 and Step 7 files.
+- Internal style governs all internal output; outreach style governs Step 7 only. Never mix.
+
+---
+
+## styles/internal.md
+
+Internal voice — governs working comms and internal docs.
+
+```
+Greeting:  Hi [First Name], — first name only, no "Dear"
+Opening:   Jump straight to subject. No pleasantries.
+Body:      Short sentences. One idea per sentence. Bullets for lists. Tables for structured data.
+Tone:      Direct, assertive, matter-of-fact. No hedging. No padding.
+Close:     No closing phrase — end at the last action sentence.
+Avoid:     Long preambles, boilerplate closers, over-hedging, bold headers in prose paragraphs.
+```
+
+---
+
+## styles/outreach.md
+
+Outreach voice — governs the Step 7 external publisher pitch only.
+
+Principles:
+- Lead with the reader, not the link. Open on what the placement does for the article's audience.
+- One clear hook. Name the specific gap in their article you can fill.
+- Earn the ask with proof. Reference a real section or sentence — generic praise reads as mail-merge.
+- Confident, not deferential. You are offering value. No grovelling.
+- Short. A few tight paragraphs.
+
+Structure: Hook → Connection → Proof → CTA
+
+Avoid: subject-line clickbait, filler openings, explaining SEO mechanics to editors, multiple asks.
+
+---
+
+## AGENTS.md (excerpt)
+
+Step summary:
+
+| Step | What happens | Pauses? |
+|---|---|---|
+| 0 | Check saved session; offer resume | Only if prior session found |
+| 1 | Gather inputs | Always |
+| 2 | Parallel research agents | No |
+| 2.5 | Contact gate | Only if no contact found |
+| 3 | Audience fit check | Always |
+| 4 | Anchor text | Always |
+| 5 | Generate 9 variations | No |
+| 6 | Internal proposal | Always |
+| 7 | External pitch | Always |
+
+Session state saved to `~/.claude/temp/link-pitch-session.json`. Deleted on completion.
+
+---
+
+## references/steps.md
+
+See full file at: https://github.com/ChiefStarKid/link-pitch/blob/master/references/steps.md
+
+Key agent prompts summary:
+
+**Company Researcher** (Step 2, Agent 1): fetches client website, extracts self-view, ICP profile, key offerings. Reports only what is visible — flags sparse sites.
+
+**Article Analyzer** (Step 2, Agent 2): fetches target article, identifies insertion landscape, blue ocean gaps, audience profile, publisher editorial stance, and performs a 4-criterion contact information audit (email / contact form / contributor page / named editor social).
+
+**Article Discovery Agent** (Step 1c, optional): runs 3 web searches for candidate articles, pre-screens 8–10 candidates on 5 criteria, returns top 3 with fit scores and insertion seam descriptions.
+
+---
+
+## references/templates.md
+
+Three output files. All named `LinkPitch-<type>-<client-domain>-<date>.md`.
+
+**Options file:** 9 variations structured as Option A (simple placement, 3 var) / Option B (comprehensive edit, 3 var) / Option C (guest post, 3 var). Each variation includes original→modified text or new content with insertion point and rationale.
+
+**Internal proposal:** Value proposition → Recommended option with reasoning → Publisher risk + placement value estimate → Supporting analysis (audience alignment, blue ocean gaps, contact routes) → All 9 variations inline → Fallback design.
+
+**External pitch:** Publisher-facing email in outreach voice. To/Re header → optional contact caveat if no route found → Summary → The Suggestion (selected variations) → Why This Works (for readers / for publication) → Next Steps.
