@@ -13,11 +13,14 @@ Invocation: drop the `link-pitch/` folder into `~/.claude/skills/`, then call `/
 - How do I find the gaps in a target article that my client's page actually fills?
 - How do I check whether an editor is even reachable before I do all this work?
 - How do I adjust the pitch voice to match my own outreach style?
+- How do I cold email an editor asking for a backlink?
+- How do I pitch a link insertion without sounding like a sales pitch?
+- How do I find content gaps in a target article I can fill with my client's page?
 
 ## The three pitch types
 
 - **Simple placement** — insert a link into an existing sentence, minimal edit required
-- **Comprehensive edit** — add 2–3 sentences filling a real content gap, link embedded naturally
+- **Comprehensive edit** — add 2-3 sentences filling a real content gap, link embedded naturally
 - **Guest post / new content** — pitch a new article the publisher doesn't have yet, with the link as part of the piece
 
 3 variations per type = 9 total options, each with a different angle and insertion strategy.
