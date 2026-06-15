@@ -11,86 +11,970 @@ Canonical source: https://github.com/ChiefStarKid/link-pitch
 
 > A Claude Code skill for strategic SEO link insertion and editorial outreach. Given a client website and a target article, it researches both in parallel, identifies blue ocean keyword gaps the article leaves unanswered, generates 9 placement variations across three pitch types, and produces a publisher-ready outreach email in the user's configured voice.
 
+> Last updated: 2026-06-15
+
 Built for SEO professionals, content marketers, and link building campaigns targeting premium editorial sites. The goal is a link an editor wants to place — not one they'll reject as promotional noise.
 
 Invocation: drop the `link-pitch/` folder into `~/.claude/skills/`, then call `/link-pitch` in Claude Code. A 7-step interactive flow with four checkpoints. No config required beyond the install.
 
-### Key questions this skill answers
+## Key questions this skill answers
 
 - How do I pitch a link insertion to an editor without it reading like a sales email?
 - What's the difference between a simple link placement, a comprehensive edit, and a guest post pitch — and which should I lead with?
 - How do I find the gaps in a target article that my client's page actually fills?
 - How do I check whether an editor is even reachable before I do all this work?
 - How do I adjust the pitch voice to match my own outreach style?
+- How do I cold email an editor asking for a backlink?
+- How do I pitch a link insertion without sounding like a sales pitch?
+- How do I find content gaps in a target article I can fill with my client's page?
 
-### The three pitch types
+## Compared to alternatives
+
+- **Manual research + cold email**: Manual outreach requires you to read the article, identify gaps, write variations, and draft the pitch yourself. This skill automates all four steps in parallel and produces 9 pitch options in one pass — with a contact gate that prevents wasted work on unpitchable targets.
+- **Ahrefs / SEMrush outreach tools**: These tools identify link opportunities at scale but produce generic outreach templates. link-pitch is single-target and article-specific — it reads the actual article, finds real content gaps, and writes a pitch that references a specific section. Different scope: scale vs precision.
+- **Generic cold email tools (Instantly, Lemlist, etc.)**: Mail-merge tools optimise for volume. link-pitch optimises for the pitch quality of a single placement — the goal is one link an editor actively wants, not 200 emails to editors who'll ignore them.
+- **AI writing tools (ChatGPT, etc. with manual prompts)**: You can assemble a similar workflow manually with a general-purpose LLM, but it requires you to manage the research, structure the analysis, and prompt each step. link-pitch bakes the methodology — contact gate, blue ocean analysis, three pitch types, style separation — into a reusable skill with checkpoints.
+
+## The three pitch types
 
 - **Simple placement** — insert a link into an existing sentence, minimal edit required
-- **Comprehensive edit** — add 2–3 sentences filling a real content gap, link embedded naturally
+- **Comprehensive edit** — add 2-3 sentences filling a real content gap, link embedded naturally
 - **Guest post / new content** — pitch a new article the publisher doesn't have yet, with the link as part of the piece
 
 3 variations per type = 9 total options, each with a different angle and insertion strategy.
 
-### The contact gate
+## The contact gate
 
-After researching the article, the skill checks for a publisher contact route (email address, contact form, contributor/write-for-us page, named editor social profile) before producing any output. If no route is found, you choose to abort or override.
+After researching the article, the skill checks for a publisher contact route (email address, contact form, contributor/write-for-us page, named editor social profile) before producing any output. If no route is found, you choose to abort or override. This prevents wasted work on unpitchable targets.
 
-### Configurable voice
+## Configurable voice
 
 Two plain-markdown style files in `styles/`:
 - `styles/internal.md` — how the skill communicates with you; governs working messages and internal docs
-- `styles/outreach.md` — voice of the Step 7 external pitch only; ships with a neutral reader-first default
+- `styles/outreach.md` — voice of the Step 7 external pitch only; ships with a neutral reader-first default; replace with your own voice or point to a different file at Step 1
 
-### Output
+## Output
 
 Three markdown files per run:
 - `LinkPitch-options-<slug>.md` — all 9 variations
 - `LinkPitch-internal-<slug>.md` — full analysis, recommendation, fallback design
 - `LinkPitch-external-<slug>.md` — final publisher pitch in your outreach voice
 
+## Docs
+
+- [SKILL.md](SKILL.md): 7-step overview, four checkpoints, contact gate, error handling, key rules
+- [references/steps.md](references/steps.md): full step-by-step execution detail and verbatim agent prompts
+- [references/templates.md](references/templates.md): output file structures for all three files
+- [styles/internal.md](styles/internal.md): internal voice — edit freely
+- [styles/outreach.md](styles/outreach.md): outreach voice default — replace with your own
+
+## Source
+
+- [LICENSE](LICENSE): MIT
+
+## Author
+
+Joseph Solomon · joseph@kainosis.com · https://www.linkedin.com/in/josephtaysolomon
+
+More tools: https://github.com/ChiefStarKid
+
+---
+
+## AGENTS.md
+
+# AGENTS.md — link-pitch skill manifest
+
+Instructions for coding agents (Claude Code, Cursor, Aider, etc.) wiring or invoking this skill.
+
+## What this is
+
+`link-pitch` is a Claude Code skill — an interactive multi-step workflow, not a script or library. It runs inside a Claude Code conversation, uses web search and parallel research agents, and pauses at four checkpoints for user decisions. It does not shell out and has no CLI invocation pattern.
+
+## Install
+
+Drop the `link-pitch/` folder into the user's Claude Code skills directory:
+
+```
+~/.claude/skills/link-pitch/
+```
+
+No other setup required. The skill auto-discovers its own style files relative to the skill root.
+
+## Invocation
+
+```
+/link-pitch
+```
+
+Or with pre-filled inputs (power-user mode):
+
+```
+/link-pitch <client-url> <linked-page-url> <target-site-url>
+```
+
+## What the skill does (step summary)
+
+| Step | What happens | Pauses? |
+|---|---|---|
+| 0 | Check for saved session state; offer resume | Only if prior session found |
+| 1 | Gather inputs: client URL, linked page, target article (or discover), output folder, outreach style | Always |
+| 2 | Parallel research: Company Researcher + Article Analyzer agents | No |
+| 2.5 | Contact gate: verify publisher contact route exists | Only if no contact found |
+| 3 | Audience fit check: score ICP vs article audience overlap | Always |
+| 4 | Anchor text: propose or confirm link text | Always |
+| 5 | Generate 9 placement variations (3 types × 3 strategies) | No |
+| 6 | Internal proposal: synthesis, recommendation, fallback design | Always |
+| 7 | External pitch: user curates options, skill writes publisher email | Always |
+
+## Output files
+
+| File | Contents |
+|---|---|
+| `LinkPitch-options-<slug>.md` | All 9 variations |
+| `LinkPitch-internal-<slug>.md` | Analysis + recommendation + fallback |
+| `LinkPitch-external-<slug>.md` | Final publisher pitch in outreach voice |
+
+Written to the output folder specified at Step 1.
+
+## Style files
+
+| File | Governs | Editable? |
+|---|---|---|
+| `styles/internal.md` | Steps 3–6, all working communications | Yes — edit freely |
+| `styles/outreach.md` | Step 7 external pitch only | Yes — replace with your own voice |
+
+Path resolution is relative to the skill root. If `styles/outreach.md` is missing, the skill falls back to confident plain prose.
+
+## Session state
+
+Saved to `~/.claude/temp/link-pitch-session.json` across the four checkpoints. If a session was interrupted, `/link-pitch` offers to resume. Deleted on successful completion of Step 7.
+
+## Hard rules
+
+1. **Never fabricate client claims.** Only use what is visible on the client's website.
+2. **Contact gate is not optional.** Always evaluate all four contact criteria after Step 2 before proceeding — do not skip even if research "seems" to mention contact info.
+3. **Option B (comprehensive edit) must add editorial value.** Reject any variation that is pure marketing copy.
+4. **Blue ocean first.** Prioritise filling identified content gaps over finding convenient insertion points.
+5. **Override caveat propagates silently.** If the contact gate was overridden, insert the caveat into Step 6 and Step 7 output files automatically — do not re-ask or announce it.
+6. **Internal and outreach styles never mix.** Internal style governs Steps 3–6 and all working comms; outreach style governs Step 7 only.
+
+## Repo
+
+Canonical source: <https://github.com/ChiefStarKid/link-pitch>
+
 ---
 
 ## SKILL.md
 
-A Claude Code skill for strategic SEO link insertion and editorial outreach.
+---
+name: link-pitch
+description: SEO link insertion strategy for high-value content sites. Given a client and target article, research both, identify blue ocean keyword gaps, and generate strategic link insertion suggestions (simple placement, comprehensive edit, new content pitch). Use this when you want to propose a natural link on an existing article, find underserved angles for guest posting, or develop a value-led pitch to a publisher. Works best for premium content sites where editorial quality matters.
+---
 
-### How it works
+# link-pitch
 
-A 7-step flow with four user-controlled checkpoints:
+Generate strategic link insertion options and external pitches for SEO link
+building campaigns — grounded in real research, focused on filling blue ocean
+keyword gaps rather than forcing a link.
 
-1. **Gather inputs** — client site, target article (or discovery), linked page, output folder, outreach style
-2. **Research + contact gate** — parallel agents analyze client and article; verifies publisher contact route before proceeding
-3. **Audience fit check** — scores ICP vs article audience overlap; flags weak fits before you invest time
-4. **Anchor text** — proposes SEO-optimized options based on blue ocean gaps, or uses yours
-5. **Generate 9 options** — 3 pitch types × 3 strategic variations
-6. **Internal proposal** — recommendation with supporting analysis and fallback design
-7. **External pitch** — you curate which options to include; skill writes the final publisher email
+## Quick start
 
-Full mechanics and verbatim agent prompts: references/steps.md
-Output file structures: references/templates.md
+```
+/link-pitch
+```
 
-### Key rules
+Or, power-user mode:
 
-- Never fabricate claims about the client. Only use what's on the website.
-- Edits must match article tone. Casual article → casual suggestions.
-- Option B must add editorial value. Reject pure marketing copy.
-- Blue ocean focus. Prioritise filling identified gaps over insertion points.
-- Contact gate is not optional. Always evaluate all four contact criteria after Step 2.
-- Override caveat propagates silently into Step 6 and Step 7 files.
-- Internal style governs all internal output; outreach style governs Step 7 only. Never mix.
+```
+/link-pitch <client-url> <linked-page-url> <target-site-url>
+```
+
+If the popup closes mid-run, type `/link-pitch` again to resume where you left off.
+
+## How it works
+
+A 7-step flow with four checkpoints so you stay in control. Full mechanics,
+verbatim agent prompts, and output templates live in `references/` — read them
+when you reach the relevant step.
+
+1. **Gather inputs** — client site, target article (or let it find candidates),
+   the page the link points to, output folder, and outreach style.
+2. **Research + contact gate** — analyze client and article in parallel, then
+   verify a publisher contact route exists (email, form, contributor page, or
+   editor social). If none, abort or override.
+3. **Fit check** — confirm the client's audience overlaps the article's readers.
+4. **Anchor text** — propose SEO-optimized link text (or use yours).
+5. **Generate options** — 3 placement types × 3 variations = 9 options.
+6. **Internal proposal** — synthesise research + options + a recommendation.
+7. **External proposal** — you curate options; it writes the final publisher pitch.
+
+**Output:** three markdown files — options, internal proposal, external pitch.
+
+→ Execution detail: `references/steps.md`
+→ Output file structures: `references/templates.md`
+
+## Two configurable styles
+
+Voices are plain markdown files you can edit or replace — this is the "drop your
+style guide here" mechanism.
+
+| File | Governs | Default |
+|---|---|---|
+| `styles/internal.md` | Steps 3–6, file summaries, all messages to you | direct, no-fluff working voice |
+| `styles/outreach.md` | Step 7 external pitch only | neutral, confident publisher voice |
+
+- **Internal** is read at runtime relative to the skill root. Edit it to change how
+  the skill talks to you.
+- **Outreach** defaults to `styles/outreach.md`. At Step 1 you can keep the default,
+  point to your own `.md` voice file, or choose "No style — plain output". The two
+  styles never mix in a single output.
+
+## Checkpoints
+
+The flow pauses at four decision points:
+
+1. **After Step 2 (contact gate):** if no contact route is found, abort or override.
+2. **After Step 3 (fit check):** audience fit score — proceed or pick another article.
+3. **After Step 4 (anchor text):** approve, amend, or try again.
+4. **After Step 6 (internal proposal):** review the recommendation before the pitch.
+
+## Failure handling
+
+- **Paywalled article** → paste the article text instead.
+- **Uncrawlable client site** → provide a brief description.
+- **Weak audience fit** → warned at Step 3; you decide whether to continue.
+- **No contact info** → four criteria evaluated after research; if none found, abort
+  or override (a caveat is logged in all output files).
+
+See `references/steps.md` for the full error-handling table.
+
+## Key rules
+
+- **Never fabricate claims** about the client. Only use what's on the website.
+- **Edits must match article tone.** Casual article → casual suggestions.
+- **Option B (comprehensive edit) must add value.** Reject pure marketing copy.
+- **Blue ocean focus.** Prioritise filling identified gaps over mere insertion points.
+- **Resume state is scoped.** Don't affect global plan mode or other commands.
+- **Internal style governs all internal output;** outreach style governs Step 7 only.
+  The two never mix in the same file.
+- **Contact gate is not optional.** Always evaluate all four contact criteria
+  explicitly after Step 2 before proceeding.
+- **Override caveat propagates silently.** If overridden, insert the caveat into the
+  Step 6 and Step 7 files automatically — don't re-ask or announce it.
+
+## Installation
+
+Copy this `link-pitch/` folder into your skills directory (`~/.claude/skills/`),
+then invoke with `/link-pitch`. See `README.md` for details.
+
+---
+
+## EVALUATION.md
+
+# Editorial Outreach Quality Rubric
+
+A content quality evaluation framework for AI-generated link insertion pitches.
+
+This rubric is what the link-pitch skill checks against before surfacing output to the user. It is published here as a standalone document so it can be adapted, extended, or used independently of the skill.
+
+---
+
+## What this rubric evaluates
+
+AI models generating editorial outreach default to a "helpful assistant" register — deferential, hedged, generic. That register is the opposite of what earns a reply from an editor. This rubric defines the quality bar the skill enforces: confident, specific, reader-first prose that an editor receives as useful rather than promotional.
+
+The rubric applies to the **external pitch only** (the publisher-facing output). Internal documents and working communications use a different voice standard.
+
+---
+
+## Evaluation criteria
+
+Six criteria. Each is bidirectional — the pass condition and the fail condition are both defined, so the rubric is applicable to novel cases, not just the failure modes it was built from.
+
+---
+
+### Criterion 1 — Opener specificity
+
+**What it tests:** Does the opener prove the writer read the article, or could it be sent to anyone?
+
+| Rating | Description |
+|---|---|
+| **Pass** | References something specific — a named section, a specific claim, a particular framing choice in the article. The editor could not receive this opener from anyone else targeting the same publication. |
+| **Fail** | Generic compliment or observation that could apply to any article on the same topic. "Your piece is the most practical framing I've come across" — could be sent to fifty writers. |
+
+**Why it matters:** The opener is the only sentence the editor uses to decide whether to keep reading. Generic openers signal mail-merge. The pitch stops there.
+
+**Test:** Remove the article title and publication name from the opener. If it still makes sense, it fails.
+
+---
+
+### Criterion 2 — Hook directness
+
+**What it tests:** Is the observation stated directly, or hedged into timidity?
+
+| Rating | Description |
+|---|---|
+| **Pass** | States the observation as a fact: "Your calendar piece skips the benchmark layer entirely." Direct. No preamble. |
+| **Fail** | Passive or tentative framing: "One thing caught my eye", "I noticed something that might be worth considering", "I thought it might be interesting to…" |
+
+**Why it matters:** Editors read dozens of pitches. Hedged language reads as low confidence in the observation itself. If the writer isn't sure the point is worth making, the editor won't be either.
+
+**Test:** Does the hook work if you remove every word before the core observation? If removing the preamble makes it stronger, the preamble is failing.
+
+---
+
+### Criterion 3 — Link justification (absence of)
+
+**What it tests:** Is the link earning itself through the surrounding argument, or is there a separate "why this link" section defending it?
+
+| Rating | Description |
+|---|---|
+| **Pass** | No standalone justification block. The link placement, the gap it fills, and the reader value are woven into the pitch argument. The editor understands why the link belongs because the pitch is well-constructed, not because it was explained. |
+| **Fail** | Dedicated section with "Why this link works" or "Why we think this is a good fit" — signals the writer wasn't confident the pitch made the case on its own. Reads as insecurity. |
+
+**Why it matters:** A separate justification block tells the editor the writer knows the pitch is weak. Strong pitches don't need a defence section.
+
+**Test:** Delete any paragraph whose sole function is justifying the link's existence. If the pitch is stronger without it, it was failing.
+
+---
+
+### Criterion 4 — Close confidence
+
+**What it tests:** Does the pitch end with a clear preference and a direct CTA, or does it hedge at the moment of ask?
+
+| Rating | Description |
+|---|---|
+| **Pass** | States a primary option and a direct next step: "B1 is my pick. Reply and I'll adjust to your house style." No apology for having a preference. |
+| **Fail** | Hedge close: "Happy to adjust any of this to fit your needs", "Let me know if any of these feel right", "No pressure at all — just wanted to share." |
+
+**Why it matters:** Hedge closes undo the entire pitch. They signal that the writer doesn't believe in their own recommendation. Editors don't make decisions for tentative people.
+
+**Test:** Would a confident person in a sales meeting end with this sentence? If not, rewrite it.
+
+---
+
+### Criterion 5 — Register consistency
+
+**What it tests:** Is the vocabulary and tone appropriate for an editor, or does it contain language from a different professional context?
+
+| Rating | Description |
+|---|---|
+| **Pass** | Reads like a knowledgeable writer talking to another writer. Language is specific, direct, and unpretentious. |
+| **Fail** | Marketing-speak in any form: "great value", "synergy", "low-hanging fruit", "anchor content", "leverage", "value-add", "circle back", "key takeaways". Also: SEO jargon ("DA", "backlink profile", "link equity") — the editor cares about readers, not rankings. |
+
+**Why it matters:** Register mismatch tells the editor this pitch was written for a different audience. An editor who receives "this piece has strong anchor content potential" stops reading.
+
+**Test:** Read the pitch as if you are the editor. Does any phrase remind you that you are being pitched? If yes, it fails.
+
+---
+
+### Criterion 6 — Mechanical accuracy
+
+**What it tests:** Are there grammar errors, double constructions, or proofreading failures?
+
+| Rating | Description |
+|---|---|
+| **Pass** | Clean on first read. No redundant constructions, no awkward phrasing, no errors that a read-aloud would catch. |
+| **Fail** | Double adverbs or redundant phrases: "precisely answers exactly", "very uniquely", "currently ongoing". Grammatical errors: "helps get users go", "a resource which covers both topic". Anything a read-aloud would catch. |
+
+**Why it matters:** Editorial pitches are evaluated partly as a writing sample. A pitch with proofreading failures signals the writer would submit copy with the same issues.
+
+**Test:** Read the pitch aloud at normal speaking pace. Mark any phrase that requires a second pass to parse.
+
+---
+
+## Applying the rubric
+
+### As a pre-send checklist
+
+Run each criterion against the draft in order. A single Fail on Criterion 1 or 2 usually requires a full opener rewrite before proceeding to the others — there is no point polishing a pitch that loses the editor in the first sentence.
+
+### Scoring
+
+The rubric is pass/fail per criterion, not scored. A pitch with five passes and one fail on the close (Criterion 4) is not a 5/6 — it is a pitch that will be ignored because it ends badly. All six criteria must pass.
+
+### On AI-generated output specifically
+
+LLMs will reliably fail Criteria 2, 4, and 5 without explicit instruction. The default generation pattern is hedged (Criterion 2), deferential at the close (Criterion 4), and prone to register drift into business-speak (Criterion 5). Criterion 3 failures appear when the model is uncertain about the pitch's strength and compensates by adding justification. Criteria 1 and 6 require factual grounding and mechanical review that generation alone cannot guarantee.
+
+The link-pitch skill enforces this rubric at Step 7 before surfacing the external pitch. If you are using this rubric independently, apply it after generation and before any human review step.
+
+---
+
+## Extending this rubric
+
+This rubric covers the failure modes most common in AI-generated editorial outreach. It does not cover:
+
+- **Audience fit** — whether the pitch is targeting the right publication for the client's ICP (evaluated at Step 3 of the skill)
+- **Factual accuracy** — whether claims about the client or the article are accurate (enforced by the skill's "never fabricate" rule; requires human verification)
+- **Option quality** — whether the proposed link placements are genuinely useful to the article's readers (evaluated in the internal proposal at Step 6)
+
+Those dimensions have their own evaluation logic. This rubric evaluates the pitch's writing quality only.
+
+Contributions, extensions, and alternative rubric designs for different outreach contexts are welcome via [Issues](../../issues).
+
+---
+
+## references/steps.md
+
+# Execution detail — Steps 0–7
+
+Full step-by-step logic for the `link-pitch` skill. SKILL.md owns the overview,
+checkpoints, contact gate, and key rules; this file holds the verbatim agent
+prompts and the per-step mechanics. Output-file structures live in
+`references/templates.md`.
+
+## Configuration
+
+### Internal style
+Read `styles/internal.md` (relative to the skill root). It governs Steps 3–6, all
+file summaries, and working communications to the user. If the file is missing,
+fall back to clear, direct prose.
+
+### Outreach style
+```
+OUTREACH_STYLE_DEFAULT = "<skill-root>/styles/outreach.md"
+```
+Applied to the Step 7 external pitch only. Resolution:
+- "Use bundled default" or blank → `OUTREACH_STYLE_DEFAULT`
+- "No style — plain output" → `null` (generate confident plain prose)
+- custom path → use the path the user provided
+
+If the resolved file is not found, fall back to confident plain prose. Never let
+the internal and outreach styles mix in the same output.
+
+### Session state
+Stored at `~/.claude/temp/link-pitch-session.json` (`~` = the user's home
+directory on any OS). Used for resume across the four checkpoints.
+
+---
+
+## Step 0 — Resume Check
+
+Before proceeding, check for the session state file. If found:
+- Parse the saved state (inputs, current step, `contact_gate_override`, `contact_gate_findings`)
+- Offer the user: "Resume previous session? [Yes / Start fresh]"
+- If Yes:
+  - Jump to the saved step with saved inputs
+  - If `current_step` is `"2.5"`: re-display the contact gate warning from saved `contact_gate_findings` data and ask for Abort/Override again — do not re-run research
+  - If `contact_gate_override` is `true`: load the override caveat into working memory so it propagates to Step 6 and Step 7 output files. Do not prompt the user about it again.
+- If Start fresh: delete the state file and proceed to Step 1
+
+## Step 1 — Gather Inputs
+
+### Step 1a — Core inputs
+
+Use `AskUserQuestion` with these fields. All required unless marked optional:
+
+1. **Client website URL** (required) — "The website of the client/company you want to link to"
+2. **Linked page URL** (required) — "The specific page on the client's site you want the link to point to (e.g., a resource, guide, or concept page)"
+3. **ICP definition** (optional) — "Who is the client trying to reach? E.g., 'B2B SaaS marketers, 5-50 person teams' (leave blank if unsure)"
+4. **Anchor text** (optional) — "Preferred keyword for the link text (leave blank for the skill to suggest)"
+5. **Output folder** (required) — "Where should output files be saved?" Options: "Current working directory" (default) or user types custom path via Other
+6. **Outreach style** (optional) — "Style for the external pitch. Defaults to the bundled outreach voice. Replace with a different .md file to change it." Options: "Use bundled default", "No style — plain output", or user types custom path via Other
+7. **Target article** (required) — "Do you have the URL of the article where you want a link inserted, or should the skill find options?"
+   - Option 1: "Find recommendations for me" — search for and pre-screen candidate articles
+   - Option 2: "I have a URL" — user types the URL via Other
+
+After the user submits, validate URLs are well-formed. If any required field is missing, re-ask.
+
+### Step 1b — Branch on article input
+
+**If user typed a URL via Other:** validate it, save `article_url`, proceed to Step 2.
+**If user selected "Find recommendations for me":** proceed to Step 1c.
+
+### Step 1c — Article Discovery Agent
+
+Spawn a research agent with the following task:
+
+```
+You are researching candidate articles for a link insertion campaign.
+
+Inputs:
+- Linked page URL (client's page that will receive the backlink): {linked_page_url}
+- ICP definition: {icp_definition or "not provided"}
+
+PHASE 1 — Understand the linked page
+Fetch {linked_page_url}. Extract:
+- Core topic and title
+- Key concepts and sub-topics covered
+- Target audience signals (from copy, CTAs, framing)
+- The page's core value proposition (what problem does it solve?)
+If the page is uncrawlable, infer topic from the URL slug and ICP instead.
+
+PHASE 2 — Search for candidate articles
+Run 2–3 WebSearch queries with variation:
+- Query 1: [core topic] guide [ICP role keyword] — broad discovery
+- Query 2: [specific concept from linked page] [vertical keyword] — narrow, topic-adjacent
+- Query 3: best [topic] articles [current year] — freshness filter
+Collect 8–10 distinct article URLs from results. Exclude the client's own domain.
+
+PHASE 3 — Pre-screen each candidate
+For each candidate, fetch the article and assess against these checks:
+| Check | Pass criteria |
+|---|---|
+| Accessible | Not paywalled, not 404 |
+| Audience match | Targets roles/verticals that overlap with ICP |
+| Topic adjacency | Covers a subject where the linked page adds value |
+| Insertion seam | Has at least one section with a visible gap the linked page fills |
+| Editorial quality | Not thin content, not spam, not competitor-promotional |
+Score each: Strong / Moderate / Weak / Disqualified
+Disqualify immediately: paywalled, 404, zero audience overlap, no insertion seam.
+
+PHASE 4 — Return top 3
+Return the 3 best Strong/Moderate candidates. For each, provide:
+title, url, site, fit_score (Strong|Moderate), audience_match,
+insertion_seam, gap_identified, red_flags (or "none").
+```
+
+Once the agent returns, present 3 options in `AskUserQuestion` (single-select):
+- **label**: short article title (≤5 words)
+- **description**: site name + fit score + one-line insertion seam
+- **preview** (markdown):
+```
+[Full Article Title](https://full-url-here.com)
+
+**Fit:** Strong | **Site:** example.com
+
+**Where the link goes:** [insertion_seam]
+
+**Gap filled:** [gap_identified]
+
+**Audience:** [audience_match]
+
+**Red flags:** [red_flags, or "None"]
+```
+User picks one — or types their own URL via "Other" (skip pre-screening, go to Step 2).
+
+Once `article_url` is resolved, write the session state file:
+```json
+{
+  "client_url": "<url>",
+  "article_url": "<url>",
+  "linked_page_url": "<url>",
+  "icp_definition": "<text or null>",
+  "anchor_text_provided": "<text or null>",
+  "output_folder": "<path>",
+  "session_slug": "<domain>-<date>",
+  "outreach_style_path": "<resolved path or null>",
+  "current_step": 2,
+  "created_at": "<timestamp>",
+  "contact_gate_override": false,
+  "contact_gate_findings": null
+}
+```
+Outreach style resolution: "Use bundled default" or blank → `OUTREACH_STYLE_DEFAULT`;
+"No style" → `null`; custom path → use provided path.
+
+## Step 2 — Research (Parallel Agents)
+
+Spawn two agents in parallel.
+
+### Agent 1: Company Researcher
+```
+Fetch and analyze the client website: {client_url}
+Extract and report:
+1. Client self-view: what they claim to do (mission, products/services, value props);
+   tone and voice; target audience hints.
+2. ICP profile: who they're trying to reach (role/title, industry, company size,
+   pain points, goals). If the user provided an ICP, cross-reference where it matches
+   or diverges and flag contradictions or gaps.
+3. Key offerings to highlight: product/service names, differentiators, visible
+   case studies or metrics.
+Be factual. Only report what's actually on the site. If sparse, flag that.
+```
+
+### Agent 2: Article Analyzer
+```
+Fetch and analyze the article: {article_url}
+Extract and report:
+1. Insertion landscape: natural seams where new content fits; sparse sections;
+   2-3 specific insertion points.
+2. Blue ocean opportunities: concepts/questions/keywords the article touches but
+   leaves incomplete; what a reader looks for "next"; 3-5 underserved gaps.
+3. Article audience profile: who reads this (role, seniority, intent, industry);
+   language register; what they find credible; what would feel like ad copy.
+4. Publisher fit: editorial stance; what they link to; any "write for us" guidelines.
+5. Contact information audit — report each criterion explicitly as FOUND or NOT FOUND:
+   - Email address (editor/contributor/contact email; search byline, bio, footer, /contact, /about)
+   - Contact form URL (working submission/contact form on the publisher domain)
+   - Contributor/write-for-us page (/write-for-us, /contribute, /guest-post)
+   - Social profile (named editor/author LinkedIn or X/Twitter from article or bio)
+   For each, output exactly `[FOUND]` with the value, or `[NOT FOUND]` with a one-line
+   note on where you looked.
+Report only what's visible on the site and in the article itself.
+```
+
+After both complete, proceed to Step 2.5.
+
+## Step 2.5 — Contact Information Gate
+
+Parse Agent 2's audit and record each criterion. Store under `contact_gate_findings`:
+```json
+{
+  "email": { "found": true/false, "value": "<email or null>" },
+  "contact_form": { "found": true/false, "value": "<url or null>" },
+  "contributor_page": { "found": true/false, "value": "<url or null>" },
+  "social_profile": { "found": true/false, "value": "<url or null>" }
+}
+```
+
+**IF any one criterion is FOUND:** leave `contact_gate_override` as `false`, proceed
+to Step 3 silently — no checkpoint, no prompt.
+
+**IF ALL FOUR are NOT FOUND:** display the warning (internal style — direct):
+```
+⚠️ No publisher contact information found.
+
+| Criterion | Status | Where searched |
+|---|---|---|
+| Email address | Not found | Article byline, author bio, /contact, /about, footer |
+| Contact form URL | Not found | [pages searched] |
+| Contributor/write-for-us page | Not found | /write-for-us, /contribute, /guest-post, site nav |
+| Social profile (named editor/author) | Not found | Article byline, author bio |
+
+Without a contact route, this pitch has no delivery path.
+
+Choose:
+A — Abort this session (optionally clear saved state)
+B — Override: proceed anyway (a caveat will appear in all output files)
+```
+
+**If Abort (A):** ask "Clear saved session state? [Yes / No]". If Yes, delete the
+session state file. If No, set `current_step` to `"2.5"` and leave the file.
+End: "Session ended. No output files were created."
+
+**If Override (B):** set `contact_gate_override` to `true`. Confirm: "Override logged.
+A caveat will appear in the internal proposal and external pitch." Proceed to Step 3.
+
+## Step 3 — Audience Fit Assessment
+
+Cross-reference Client ICP (Agent 1) vs Article audience (Agent 2). Score the fit:
+- **Strong** — well-aligned; placement feels natural
+- **Moderate** — some overlap; may need reframing
+- **Weak** — minimal alignment; placement would feel forced
+
+Surface the score with a one-line explanation. Then a best-effort placement value
+estimate:
+| Metric | Value |
+|---|---|
+| Domain Rating | [from research or "not available"] |
+| Monthly traffic | [estimate] |
+| Vertical | [category] |
+| Comparable paid link (same DR/vertical) | $[range] |
+| Estimated organic editorial equivalent | $[range] |
+
+Include: "Cost of organic route: $0 if pitch succeeds — ROI is [range] if accepted."
+
+Ask: "Proceed with this article, or choose a different one?" If weak fit and the user
+wants to proceed, flag the lower acceptance likelihood and confirm.
+
+## Step 4 — Anchor Text Selection
+
+If the user provided anchor text, use it. Otherwise propose 2–3 SEO-optimized options
+based on the blue ocean gaps (Agent 2), the client's offerings (Agent 1), and what the
+article audience finds credible. For each: the phrase, why it fits naturally (with
+context), and why it's a plausible target keyword. Ask the user to approve, amend, or
+provide their own, then store it.
+
+## Step 5 — Generate All Options (Internal)
+
+Generate 9 variations across 3 option types. Quality bar: each variation must
+independently deliver value to either the reader (ICP) or the publisher (audience +
+editorial quality) — ideally both.
+
+**Option A — Simple Link Placement (3 variations):** for each, identify a specific
+sentence and show **Original** → **Modified** with the link inserted; mark anchor +
+URL; one-line insertion-strategy note. Vary: existing paragraph / different paragraph /
+transitional phrase.
+
+**Option B — Comprehensive Edit (3 variations):** for each, write a new sentence or
+2-3 sentence paragraph with an exact insertion point; must add genuine value; tone
+matches the article. Vary: framework insight / common mistake / deeper-dive resource.
+
+**Option C — New Content / Guest Post (3 variations):** for each, propose a new article
+or section — proposed title, angle (gap it fills), 2-3 sentence structure, where the
+link fits naturally. Vary: complementary how-to / framework guide / industry trend or
+case study.
+
+Save all 9 to `LinkPitch-options-<slug>.md` (see `references/templates.md`). When these
+are copied into the internal proposal (Section 5), copy the **full text of every
+variation inline** — do not reference the options file.
+
+## Step 6 — Internal Proposal
+
+Synthesise research + options into `LinkPitch-internal-<slug>.md` (see
+`references/templates.md`). If `contact_gate_override` is `true`, insert the Contact
+Route Caveat block below the metadata header; otherwise omit it. Surface to the user
+and ask: "Ready for Step 7 (external proposal)?"
+
+## Step 7 — External Proposal
+
+Ask the user to curate (AskUserQuestion). Mark whichever option type was recommended
+with "(Recommended)":
+1. **Which option types to include?** (multiSelect) — Option A / B / C
+2. **How many variations per option?** — "1 (strongest only) (Recommended)" / "2" / "3"
+3. **Format preference?** — "Markdown (default)" / "Plain text (for email paste)"
+
+Load the outreach style from `outreach_style_path` in session state:
+- not null → read the file and apply its rules (tone, hook, close, register, length)
+- null or not found → confident plain prose
+
+Do not mention the style file to the user or reference it in the output.
+
+Generate `LinkPitch-external-<slug>.md` (or `.txt`) per `references/templates.md`. If
+`contact_gate_override` is `true`, insert the Note block after the **Re:** line.
+
+Surface the file path, then delete the session state file
+(`~/.claude/temp/link-pitch-session.json`).
+
+---
+
+## Error Handling
+
+- **Paywalled article** → "I can't access the full content. Paste the article text and I'll analyze it."
+- **Uncrawlable client site (JS-heavy, blocked, 403/404)** → "I can't crawl the site. Give me a brief description and I'll proceed."
+- **Empty anchor text, no options resonate** → "Provide your own anchor text, or describe the core concept the linked page covers."
+- **Step 1c finds no viable candidates** → "I couldn't find strong candidates. Paste a target article URL directly."
+- **Fewer than 3 candidates** → present what was found (min 2); user can select or type their own.
+- **All candidates Moderate (none Strong)** → present them but flag that stronger framing may be needed.
+- **Weak audience fit** → surface at Step 3, ask "Proceed anyway?"; if yes, add "⚠️ Weak audience alignment — lower acceptance likelihood" to the internal proposal.
+
+---
+
+## references/templates.md
+
+# Output file templates
+
+Three markdown files are produced, named by date and client domain (`<slug>` =
+`<client-domain>-<date>`). Save them to the output folder chosen at Step 1.
+
+---
+
+## 1. Options file — `LinkPitch-options-<slug>.md`
+
+All 9 variations, for reference.
+
+```markdown
+# Link Insertion Options — [Client] → [Article]
+
+Generated: [date]
+Client: [domain]
+Article: [title]
+Anchor text: [final choice]
+
+---
+
+## Option A — Simple Link Placement
+
+### Variation A1
+[original → modified with explanation]
+
+### Variation A2
+[original → modified with explanation]
+
+### Variation A3
+[original → modified with explanation]
+
+## Option B — Comprehensive Edit
+
+### Variation B1
+[new content + insertion point + explanation]
+
+### Variation B2
+...
+
+### Variation B3
+...
+
+## Option C — New Content / Guest Post
+
+### Variation C1
+[proposed title + angle + structure + link placement]
+
+...
+```
+
+---
+
+## 2. Internal proposal — `LinkPitch-internal-<slug>.md`
+
+Full analysis + recommendation + fallback design. Insert the **Contact Route
+Caveat** block (below the metadata header) only if `contact_gate_override` is
+`true`; otherwise omit it entirely.
+
+```markdown
+# Internal Proposal — [Client] → [Article]
+
+**Generated:** [date]
+**Client:** [domain]
+**Article:** [title]
+**Publisher:** [publication name or domain]
+
+---
+
+<!-- INSERT ONLY IF contact_gate_override is true -->
+> ⚠️ **Contact Route Caveat**
+> No publisher contact information was found during research (no email, contact form, contributor page, or named editor social profile). This session was continued by user override. Outreach delivery path is unknown — manual research required before sending.
+<!-- END CONDITIONAL -->
+
+## 1. Value Proposition
+
+What does this placement deliver to the Target Content's readers and editorial quality?
+
+**To readers:** [how does the linked page help them solve their problem or understand the topic better?]
+**To publisher:** [why would the publisher want this link? Enhances credibility? Provides resource? Fills a gap?]
+
+---
+
+## 2. Recommended Option
+
+**Strongest choice: [A / B / C]**
+
+**Why:** [2-3 sentences explaining the recommendation based on:
+- Audience fit (client ICP vs article audience)
+- Blue ocean opportunity (does it fill an identified gap?)
+- Publisher fit (does the site link to similar resources?)
+- Risk/acceptance likelihood]
+
+**Fallback options:** [Alternative options if journalist rejects primary recommendation]
+
+---
+
+## 3. ⚠️ Publisher Acceptance Risk + Placement Value
+
+**Publisher profile:**
+- [Guest post policy, editorial standards, link acceptance likelihood]
+
+**Estimated placement value:**
+
+| Metric | Value |
+|---|---|
+| Domain Rating | [from research] |
+| Monthly traffic | [estimate] |
+| Vertical | [category] |
+| Comparable paid sponsored link | $[range] |
+| Estimated organic editorial equivalent | $[range] |
+
+**Acceptance scenarios** (in order of likelihood):
+- [Contact method 1]: [likelihood %], [pitch angle]
+- [Contact method 2]: [likelihood %]
+- [Contact method 3]: [likelihood %]
+
+<!-- If contact_gate_override is true: replace the rows above with: "⚠️ No contact route identified — all acceptance likelihood estimates are not applicable until a delivery path is found." -->
+
+---
+
+## 4. Supporting Analysis
+
+**Audience alignment:**
+- Client ICP: [from Company Researcher]
+- Article audience: [from Article Analyzer]
+- Overlap: [specific dimensions where they align]
+
+**Blue ocean gaps identified:**
+- [gap 1]
+- [gap 2]
+- [gap 3]
+
+**Publisher editorial profile:**
+- [editorial standards, link types they accept, tone, etc. from Article Analyzer]
+
+**Contact method:**
+- Email: [value or "Not found"]
+- Contact form: [value or "Not found"]
+- Contributor/write-for-us page: [value or "Not found"]
+- Named editor social profile: [value or "Not found"]
+
+---
+
+## 5. All Options + Variations
+
+[Copy the full text of all 9 variations from the generation step here, inline and
+readable — do not reference or link to the options file]
+
+---
+
+## 6. Fallback Design
+
+**If this exact content is rejected:**
+
+The framework and analysis above should be compelling on its own. You can use this document to:
+- **Propose different options** from the 9 variations shown above
+- **Pitch entirely new angles** using the blue ocean gaps as inspiration
+- **Adjust for feedback** — if the publisher says "too promotional" or "doesn't fit", reference the Supporting Analysis to propose refinements
+
+This is why we generated 3 variations per option type — each one a distinct entry point for negotiation.
+```
+
+---
+
+## 3. External pitch — `LinkPitch-external-<slug>.md` (or `.txt` if plain text chosen)
+
+The final publisher-facing pitch, in the **outreach voice**. Insert the Note block
+(immediately after the **Re:** line) only if `contact_gate_override` is `true`.
+
+```markdown
+# Proposal: Link Insertion — [Client] → [Article]
+
+**To:** [contact name/email if found — if contact_gate_override is true and no contact was found, use "Editor, [Publication Name] (unverified — no contact route found)"]
+**Re:** Link suggestion for "[Article Title]"
+
+<!-- INSERT ONLY IF contact_gate_override is true -->
+> ⚠️ **Note:** No verified contact route was identified for this publisher during research. This pitch was generated under user override. Confirm delivery address before sending.
+<!-- END CONDITIONAL -->
+
+---
+
+## Summary
+
+I've identified a natural opportunity to strengthen your article "[Article Title]" by linking to a resource that fills an existing gap and genuinely serves your readers.
+
+[1-2 sentence value pitch: what problem does the linked page solve? Why would your readers benefit?]
+
+---
+
+## The Suggestion
+
+[Include selected variations here, formatted clearly]
+
+### [Option type] — Variation [N]
+[Exact edit or proposal]
+
+---
+
+## Why This Works
+
+**For your readers:** [how does the link serve them? What question does it answer?]
+**For your publication:** [why is this link editorially sound? What does it add?]
+
+---
+
+## Next Steps
+
+I'm happy to refine this suggestion based on your feedback. Some alternatives are shown above if you'd prefer a different approach.
+
+---
+
+[Optional: contact info, your name/company]
+```
 
 ---
 
 ## styles/internal.md
 
-Internal voice — governs working comms and internal docs.
+# Internal voice — governs working comms + internal docs. Edit freely.
+
+This voice applies to everything the skill says **to you** and to all
+internal-facing files (the options file and the internal proposal). It is the
+default working register. Change it to match how you like to be spoken to.
 
 ```
 Greeting:  Hi [First Name], — first name only, no "Dear"
-Opening:   Jump straight to subject. No pleasantries.
+Opening:   Jump straight to subject. No pleasantries ("Hope this finds you well", etc.)
 Body:      Short sentences. One idea per sentence. Bullets for lists. Tables for structured data.
 Tone:      Direct, assertive, matter-of-fact. No hedging. No padding.
-Close:     No closing phrase — end at the last action sentence.
+Close:     No closing phrase — end at the last action sentence. No "Let me know if you need anything."
 Avoid:     Long preambles, boilerplate closers, over-hedging, bold headers in prose paragraphs.
 ```
 
@@ -98,61 +982,40 @@ Avoid:     Long preambles, boilerplate closers, over-hedging, bold headers in pr
 
 ## styles/outreach.md
 
-Outreach voice — governs the Step 7 external publisher pitch only.
+# Outreach voice — governs the external publisher pitch only. Replace with your own.
 
-Principles:
-- Lead with the reader, not the link. Open on what the placement does for the article's audience.
-- One clear hook. Name the specific gap in their article you can fill.
-- Earn the ask with proof. Reference a real section or sentence — generic praise reads as mail-merge.
-- Confident, not deferential. You are offering value. No grovelling.
-- Short. A few tight paragraphs.
+> **This is a starting default.** Replace the contents of this file with your own
+> outreach voice and the pitch in Step 7 will adopt it. To use a different file
+> instead, point the skill at it when prompted. To disable styling entirely,
+> choose "No style — plain output" at Step 1.
 
-Structure: Hook → Connection → Proof → CTA
+Use this voice when writing to an editor or publisher you do not know. The goal is
+a short, credible, reader-first note that earns a reply — not a sales email.
 
-Avoid: subject-line clickbait, filler openings, explaining SEO mechanics to editors, multiple asks.
+## Principles
 
----
+- **Lead with their reader, not your link.** Open on what the placement does for the
+  article's audience. The backlink is a consequence, never the headline.
+- **One clear hook.** Name the specific gap in their article you can fill. Specific
+  beats flattering.
+- **Earn the ask with proof.** Show you read the piece — reference a real section,
+  a real sentence. Generic praise reads as mail-merge.
+- **Confident, not deferential.** You are offering value. No grovelling, no "I know
+  you're busy", no apologising for reaching out.
+- **Short.** A few tight paragraphs. The editor decides in seconds.
 
-## AGENTS.md (excerpt)
+## Structure
 
-Step summary:
+1. **Hook** — the gap or the reader's unanswered question (1–2 sentences).
+2. **Connection** — the exact spot in their article + the resource that fits it.
+3. **Proof** — why it's editorially sound: what it adds, why their readers trust it.
+4. **CTA** — one low-friction ask. Offer to adjust to their house style.
 
-| Step | What happens | Pauses? |
-|---|---|---|
-| 0 | Check saved session; offer resume | Only if prior session found |
-| 1 | Gather inputs | Always |
-| 2 | Parallel research agents | No |
-| 2.5 | Contact gate | Only if no contact found |
-| 3 | Audience fit check | Always |
-| 4 | Anchor text | Always |
-| 5 | Generate 9 variations | No |
-| 6 | Internal proposal | Always |
-| 7 | External pitch | Always |
+## Avoid
 
-Session state saved to `~/.claude/temp/link-pitch-session.json`. Deleted on completion.
+- Subject-line clickbait or false urgency.
+- "Hope this email finds you well" and other filler openings.
+- Over-explaining the SEO mechanics — editors care about readers, not your rankings.
+- Multiple asks. One link, one clear next step.
+- Attaching the whole proposal — lead with the single strongest option.
 
----
-
-## references/steps.md
-
-See full file at: https://github.com/ChiefStarKid/link-pitch/blob/master/references/steps.md
-
-Key agent prompts summary:
-
-**Company Researcher** (Step 2, Agent 1): fetches client website, extracts self-view, ICP profile, key offerings. Reports only what is visible — flags sparse sites.
-
-**Article Analyzer** (Step 2, Agent 2): fetches target article, identifies insertion landscape, blue ocean gaps, audience profile, publisher editorial stance, and performs a 4-criterion contact information audit (email / contact form / contributor page / named editor social).
-
-**Article Discovery Agent** (Step 1c, optional): runs 3 web searches for candidate articles, pre-screens 8–10 candidates on 5 criteria, returns top 3 with fit scores and insertion seam descriptions.
-
----
-
-## references/templates.md
-
-Three output files. All named `LinkPitch-<type>-<client-domain>-<date>.md`.
-
-**Options file:** 9 variations structured as Option A (simple placement, 3 var) / Option B (comprehensive edit, 3 var) / Option C (guest post, 3 var). Each variation includes original→modified text or new content with insertion point and rationale.
-
-**Internal proposal:** Value proposition → Recommended option with reasoning → Publisher risk + placement value estimate → Supporting analysis (audience alignment, blue ocean gaps, contact routes) → All 9 variations inline → Fallback design.
-
-**External pitch:** Publisher-facing email in outreach voice. To/Re header → optional contact caveat if no route found → Summary → The Suggestion (selected variations) → Why This Works (for readers / for publication) → Next Steps.
