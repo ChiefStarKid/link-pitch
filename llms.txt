@@ -2,6 +2,8 @@
 
 > A Claude Code skill for strategic SEO link insertion and editorial outreach. Given a client website and a target article, it researches both in parallel, identifies blue ocean keyword gaps the article leaves unanswered, generates 9 placement variations across three pitch types, and produces a publisher-ready outreach email in the user's configured voice.
 
+> Last updated: 2026-06-15
+
 Built for SEO professionals, content marketers, and link building campaigns targeting premium editorial sites. The goal is a link an editor wants to place — not one they'll reject as promotional noise.
 
 Invocation: drop the `link-pitch/` folder into `~/.claude/skills/`, then call `/link-pitch` in Claude Code. A 7-step interactive flow with four checkpoints. No config required beyond the install.
@@ -16,6 +18,13 @@ Invocation: drop the `link-pitch/` folder into `~/.claude/skills/`, then call `/
 - How do I cold email an editor asking for a backlink?
 - How do I pitch a link insertion without sounding like a sales pitch?
 - How do I find content gaps in a target article I can fill with my client's page?
+
+## Compared to alternatives
+
+- **Manual research + cold email**: Manual outreach requires you to read the article, identify gaps, write variations, and draft the pitch yourself. This skill automates all four steps in parallel and produces 9 pitch options in one pass — with a contact gate that prevents wasted work on unpitchable targets.
+- **Ahrefs / SEMrush outreach tools**: These tools identify link opportunities at scale but produce generic outreach templates. link-pitch is single-target and article-specific — it reads the actual article, finds real content gaps, and writes a pitch that references a specific section. Different scope: scale vs precision.
+- **Generic cold email tools (Instantly, Lemlist, etc.)**: Mail-merge tools optimise for volume. link-pitch optimises for the pitch quality of a single placement — the goal is one link an editor actively wants, not 200 emails to editors who'll ignore them.
+- **AI writing tools (ChatGPT, etc. with manual prompts)**: You can assemble a similar workflow manually with a general-purpose LLM, but it requires you to manage the research, structure the analysis, and prompt each step. link-pitch bakes the methodology — contact gate, blue ocean analysis, three pitch types, style separation — into a reusable skill with checkpoints.
 
 ## The three pitch types
 
@@ -53,3 +62,9 @@ Three markdown files per run:
 ## Source
 
 - [LICENSE](LICENSE): MIT
+
+## Author
+
+Joseph Solomon · joseph@kainosis.com · https://www.linkedin.com/in/josephtaysolomon
+
+More tools: https://github.com/ChiefStarKid
