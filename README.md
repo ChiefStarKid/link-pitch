@@ -38,6 +38,9 @@ Three markdown files per run:
 > *Insertion rationale: fills the gap between "choosing an anchor" and "measuring
 > result" — the article skips the intent-matching step entirely.*
 
+**Full worked example** — all three output files from a complete run:
+[examples/LinkPitch-options-contentiq-20260615.md](examples/LinkPitch-options-contentiq-20260615.md) · [LinkPitch-internal](examples/LinkPitch-internal-contentiq-20260615.md) · [LinkPitch-external](examples/LinkPitch-external-contentiq-20260615.md)
+
 ## The three pitch types
 
 - **Simple placement** — insert a link into an existing sentence with minimal edit
@@ -88,6 +91,13 @@ The two styles never mix in the same output.
 
 - [Claude Code](https://claude.ai/code) with web search enabled
 - Skills support (drop-in folder install)
+
+## Related docs
+
+- [EVALUATION.md](EVALUATION.md) — editorial quality rubric for AI-generated outreach: 6 bidirectional criteria (pass/fail + reasoning), mechanical tests per criterion, and a map of which criteria LLMs reliably fail at by default
+- [AGENTS.md](AGENTS.md) — machine-readable manifest for coding agents (Claude Code, Cursor, Aider)
+- [llms.txt](llms.txt) — [llmstxt.org](https://llmstxt.org) index for LLM ingestion
+- [examples/](examples/) — full worked example: options, internal proposal, and external pitch from a complete run
 
 ## Questions and feedback
 
