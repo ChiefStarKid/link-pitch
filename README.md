@@ -66,10 +66,10 @@ tools enabled.
 
 ## Install
 
-Copy the `link-pitch/` folder into your Claude Code skills directory:
+Copy `link-pitch.md` into your Claude Code commands directory:
 
 ```
-~/.claude/skills/link-pitch/
+~/.claude/commands/
 ```
 
 Then invoke:
@@ -91,6 +91,10 @@ The two styles never mix in the same output.
 
 - [Claude Code](https://claude.ai/code) with web search enabled
 - Skills support (drop-in folder install)
+
+## Related
+
+- [ChiefStarKid](https://github.com/ChiefStarKid/ChiefStarKid) — portfolio of Claude Code tools this skill is part of
 
 ## Related docs
 
